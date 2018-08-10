@@ -1,0 +1,16 @@
+allprojects {
+  repositories {
+    google()
+    jcenter()
+    maven {
+      url 'https://s3.amazonaws.com/salesforcesos.com/android/maven/release'
+    }
+    maven {
+      url 'http://tokbox.bintray.com/maven/'
+    }
+  }
+}
+
+dependencies {
+  implementation 'com.salesforce.service:servicesdk:214.0.1'
+}
