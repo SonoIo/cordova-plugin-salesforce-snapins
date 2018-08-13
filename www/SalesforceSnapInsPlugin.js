@@ -7,23 +7,23 @@ function errorCallback() {}
 function SalesforceSnapInsPlugin() {}
 
 // Keyboard types
-SalesforceSnapInsPlugin.prototype.KEYBOARD_TYPE_DEFAULT = 0
-SalesforceSnapInsPlugin.prototype.KEYBOARD_TYPE_ASCII_CAPABLE = 1
-SalesforceSnapInsPlugin.prototype.KEYBOARD_TYPE_NUMBERS_AND_PUNCTATION = 2
-SalesforceSnapInsPlugin.prototype.KEYBOARD_TYPE_URL = 3
-SalesforceSnapInsPlugin.prototype.KEYBOARD_TYPE_NUMBER_PAD = 4
-SalesforceSnapInsPlugin.prototype.KEYBOARD_TYPE_PHONE_PAD = 5
-SalesforceSnapInsPlugin.prototype.KEYBOARD_TYPE_NAME_PHONE_PAD = 6
-SalesforceSnapInsPlugin.prototype.KEYBOARD_TYPE_EMAIL_ADDRESS = 7
-SalesforceSnapInsPlugin.prototype.KEYBOARD_TYPE_DECIMAL_PAD = 8
-SalesforceSnapInsPlugin.prototype.KEYBOARD_TYPE_TWITTER = 9
-SalesforceSnapInsPlugin.prototype.KEYBOARD_TYPE_WEB_SEARCH = 10
-SalesforceSnapInsPlugin.prototype.KEYBOARD_TYPE_ASCII_CAPABLE_NUMBER_PAD = 11
+SalesforceSnapInsPlugin.prototype.KEYBOARD_TYPE_DEFAULT = 0;
+SalesforceSnapInsPlugin.prototype.KEYBOARD_TYPE_ASCII_CAPABLE = 1;
+SalesforceSnapInsPlugin.prototype.KEYBOARD_TYPE_NUMBERS_AND_PUNCTATION = 2;
+SalesforceSnapInsPlugin.prototype.KEYBOARD_TYPE_URL = 3;
+SalesforceSnapInsPlugin.prototype.KEYBOARD_TYPE_NUMBER_PAD = 4;
+SalesforceSnapInsPlugin.prototype.KEYBOARD_TYPE_PHONE_PAD = 5;
+SalesforceSnapInsPlugin.prototype.KEYBOARD_TYPE_NAME_PHONE_PAD = 6;
+SalesforceSnapInsPlugin.prototype.KEYBOARD_TYPE_EMAIL_ADDRESS = 7;
+SalesforceSnapInsPlugin.prototype.KEYBOARD_TYPE_DECIMAL_PAD = 8;
+SalesforceSnapInsPlugin.prototype.KEYBOARD_TYPE_TWITTER = 9;
+SalesforceSnapInsPlugin.prototype.KEYBOARD_TYPE_WEB_SEARCH = 10;
+SalesforceSnapInsPlugin.prototype.KEYBOARD_TYPE_ASCII_CAPABLE_NUMBER_PAD = 11;
 
 // Autocorrection
-SalesforceSnapInsPlugin.prototype.AUTOCORRECTION_TYPE_DEFAULT = 0
-SalesforceSnapInsPlugin.prototype.AUTOCORRECTION_TYPE_NO = 1
-SalesforceSnapInsPlugin.prototype.AUTOCORRECTION_TYPE_YES = 2
+SalesforceSnapInsPlugin.prototype.AUTOCORRECTION_TYPE_DEFAULT = 0;
+SalesforceSnapInsPlugin.prototype.AUTOCORRECTION_TYPE_NO = 1;
+SalesforceSnapInsPlugin.prototype.AUTOCORRECTION_TYPE_YES = 2;
 
 /**
  * Inizialite the plugin

@@ -23,6 +23,7 @@ import com.salesforce.android.chat.core.ChatConfiguration;
 import com.salesforce.android.chat.core.ChatCore;
 import com.salesforce.android.chat.core.model.AvailabilityState;
 import com.salesforce.android.chat.core.model.ChatEntity;
+import com.salesforce.android.chat.core.model.ChatEntityField;
 import com.salesforce.android.chat.core.model.ChatUserData;
 import com.salesforce.android.chat.ui.ChatUI;
 import com.salesforce.android.chat.ui.ChatUIClient;
@@ -31,14 +32,15 @@ import com.salesforce.android.service.common.utilities.control.Async;
 import com.salesforce.android.chat.ui.model.PreChatTextInputField;
 import com.salesforce.android.chat.ui.model.PreChatPickListField;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
 public class SalesforceSnapInsPlugin extends CordovaPlugin {
 
     private ChatConfiguration.Builder liveAgentChatConfigBuilder;
-    private List<ChatUserData> liveAgentChatUserData;
-    private List<ChatEntity> liveAgentChatEntities;
+    private List<ChatUserData> liveAgentChatUserData = new ArrayList<ChatUserData>();
+    private List<ChatEntity> liveAgentChatEntities = new ArrayList<ChatEntity>();
 
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
     }
@@ -133,6 +135,19 @@ public class SalesforceSnapInsPlugin extends CordovaPlugin {
             return this.addPrechatField(field, callbackContext);
         } else if (action.equals("clearPrechatFields")) {
             return this.clearPrechatFields(callbackContext);
+        } else if (action.equals("addPrechatEntity")) {
+
+            JSONObject entity;
+            try {
+                entity = (JSONObject)args.get(0);
+            } catch (JSONException e) {
+                callbackContext.error("Unable parse entity");
+                return false;
+            }
+
+            return this.addPrechatEntity(entity, callbackContext);
+        } else if (action.equals("clearPrechatEntities")) {
+            return this.clearPrechatEntities(callbackContext);
         }
 
         return true;
@@ -159,7 +174,7 @@ public class SalesforceSnapInsPlugin extends CordovaPlugin {
         String value;
         boolean isRequired;
         int keyboardType;
-        int autocorrectionType;
+//        int autocorrectionType; // not used on Android
         JSONArray values;
 
         try {
@@ -181,7 +196,7 @@ public class SalesforceSnapInsPlugin extends CordovaPlugin {
         }
 
         try {
-            isRequired = (boolean) field.get("isRequired");
+            isRequired = (boolean) field.get("required");
         } catch (JSONException e) {
             isRequired = false;
         }
@@ -192,11 +207,11 @@ public class SalesforceSnapInsPlugin extends CordovaPlugin {
             keyboardType = 0;
         }
 
-        try {
-            autocorrectionType = (int) field.get("autocorrectionType");
-        } catch (JSONException e) {
-            autocorrectionType = 0;
-        }
+//        try {
+//            autocorrectionType = (int) field.get("autocorrectionType");
+//        } catch (JSONException e) {
+//            autocorrectionType = 0;
+//        }
 
         try {
             values = (JSONArray) field.get("values");
@@ -209,10 +224,11 @@ public class SalesforceSnapInsPlugin extends CordovaPlugin {
                 PreChatTextInputField newTextField = new PreChatTextInputField.Builder()
                         .required(isRequired)
                         .inputType(this.mapKeyboardType(keyboardType))
-                        // .mapToChatTranscriptFieldName("Email__c") // Method not supportd on iOS
+                        // .mapToChatTranscriptFieldName("Email__c") // Method not supported on iOS
                         .build(label, label);
                 this.liveAgentChatUserData.add(newTextField);
                 break;
+
             case "hidden":
                 ChatUserData newHiddenField = new ChatUserData(
                         label,
@@ -220,6 +236,7 @@ public class SalesforceSnapInsPlugin extends CordovaPlugin {
                         true);
                 this.liveAgentChatUserData.add(newHiddenField);
                 break;
+
             case "picker":
                 if (values.length() > 0) {
                     PreChatPickListField.Builder newPickerFieldBuilder = new PreChatPickListField.Builder();
@@ -251,6 +268,7 @@ public class SalesforceSnapInsPlugin extends CordovaPlugin {
                     }
 
                     PreChatPickListField newPickerField = newPickerFieldBuilder.build(label, label);
+                    this.liveAgentChatUserData.add(newPickerField);
                 }
                 break;
         }
@@ -294,6 +312,134 @@ public class SalesforceSnapInsPlugin extends CordovaPlugin {
             default:
                 return EditorInfo.TYPE_CLASS_TEXT;
         }
+    }
+
+    private boolean addPrechatEntity(JSONObject field, CallbackContext callbackContext) {
+        String name;
+        String linkToEntityName;
+        String linkToEntityField;
+        String saveToTranscript;
+        boolean showOnCreate;
+        JSONArray fieldMap;
+
+        try {
+            name = (String) field.get("name");
+        } catch (JSONException e) {
+            name = "entity";
+        }
+
+        try {
+            linkToEntityName = (String) field.get("linkToEntityName");
+        } catch (JSONException e) {
+            linkToEntityName = "";
+        }
+
+        try {
+            linkToEntityField = (String) field.get("linkToEntityField");
+        } catch (JSONException e) {
+            linkToEntityField = "";
+        }
+
+        try {
+            saveToTranscript = (String) field.get("saveToTranscript");
+        } catch (JSONException e) {
+            saveToTranscript = "";
+        }
+
+        try {
+            showOnCreate = (boolean) field.get("showOnCreate");
+        } catch (JSONException e) {
+            showOnCreate = false;
+        }
+
+        try {
+            fieldMap = (JSONArray) field.get("fieldMap");
+        } catch (JSONException e) {
+            fieldMap = new JSONArray();
+        }
+
+        if (fieldMap.length() > 0) {
+            ChatEntity.Builder entityBuilder = new ChatEntity.Builder();
+            entityBuilder.linkToAnotherSalesforceObject(linkToEntityName, linkToEntityField);
+            entityBuilder.linkToTranscriptField(saveToTranscript);
+            entityBuilder.showOnCreate(showOnCreate);
+
+            JSONObject aField;
+            ChatUserData aChatUserData;
+            String aFieldName;
+            String aLabel;
+            boolean anIsExactMatch;
+            boolean aDoCreate;
+            boolean aDoFind;
+            for (int i = 0; i < fieldMap.length(); i++) {
+                try {
+                    aField = fieldMap.getJSONObject(i);
+                } catch (JSONException e) {
+                    continue;
+                }
+
+                try {
+                    aFieldName = (String) aField.get("fieldName");
+                } catch (JSONException e) {
+                    aFieldName = "";
+                }
+
+                try {
+                    aLabel = (String) aField.get("label");
+                } catch (JSONException e) {
+                    aLabel = "";
+                }
+
+                try {
+                    anIsExactMatch = (boolean) aField.get("isExactMatch");
+                } catch (JSONException e) {
+                    anIsExactMatch = false;
+                }
+
+                try {
+                    aDoCreate = (boolean) aField.get("doCreate");
+                } catch (JSONException e) {
+                    aDoCreate = false;
+                }
+
+                try {
+                    aDoFind = (boolean) aField.get("doFind");
+                } catch (JSONException e) {
+                    aDoFind = false;
+                }
+
+                aChatUserData = this.getChatUserDataFromLabel(aLabel);
+
+                if (aChatUserData != null) {
+                    entityBuilder.addChatEntityField(new ChatEntityField.Builder()
+                            .doFind(aDoFind)
+                            .isExactMatch(anIsExactMatch)
+                            .doCreate(aDoCreate)
+                            .build(aFieldName, aChatUserData));
+                }
+            }
+
+            ChatEntity newEntity = entityBuilder.build(name);
+            this.liveAgentChatEntities.add(newEntity);
+        }
+
+        callbackContext.success();
+
+        return true;
+    }
+
+    private boolean clearPrechatEntities(CallbackContext callbackContext) {
+        this.liveAgentChatEntities.clear();
+        return true;
+    }
+
+    private ChatUserData getChatUserDataFromLabel(@NonNull String label) {
+        for(ChatUserData aChatUserData : this.liveAgentChatUserData){
+            if (aChatUserData.getAgentLabel().equals(label)) {
+                return aChatUserData;
+            }
+        }
+        return null;
     }
 
 
