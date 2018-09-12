@@ -411,6 +411,17 @@ window.plugins.SalesforceSnapIns.initialize({
 If you want to remove, add or change any color after the first prepare be sure to clean `android.json`.
 Alternatively you can type your color directly into `app/src/main/res/values/colors.xml` with the drawback that you will lose them renewing the platform.
 
+
+## Prepare for submission (iOS)
+
+As documented on [Salesforce documentation](https://developer.salesforce.com/docs/atlas.en-us.noversion.service_sdk_ios.meta/service_sdk_ios/prepare_for_appstore.htm)
+on XCode project:
+
+- select `Build Phases`
+- create `Run script`
+- paste this line of code `$PODS_ROOT/ServiceSDK/Frameworks/ServiceCore.framework/prepare-framework`
+
+
 ## TODO
 
 - Add Case management support

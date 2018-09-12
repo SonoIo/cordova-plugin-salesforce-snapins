@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-salesforce-snapins",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Plugin for SalesForce Snap-ins",
   "cordova": {
     "id": "cordova-plugin-salesforce-snapins",
