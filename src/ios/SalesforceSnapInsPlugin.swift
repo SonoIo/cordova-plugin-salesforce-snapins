@@ -47,7 +47,18 @@ func hexStringToUIColor(_ hex: String) -> UIColor {
 
     // TODO: here add SOS and Case management configuration
 
-    override func pluginInitialize () {}
+    override func pluginInitialize () {
+        if #available(iOS 10.0, *) {
+            let center = UNUserNotificationCenter.current()
+            center.delegate = SalesforceSnapInsPlugin.shared()
+            center.requestAuthorization(options: [.alert,.sound], completionHandler: { granted, error in
+                // Enable or disable features based on authorization
+            })
+            let generalCategory = UNNotificationCategory(identifier: "General", actions: [], intentIdentifiers: [], options: .customDismissAction)
+            let categorySet: Set<UNNotificationCategory> = [generalCategory]
+            center.setNotificationCategories(categorySet)
+        }
+    }
 
     @objc func initialize(_ command: CDVInvokedUrlCommand) {
 
