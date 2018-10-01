@@ -111,10 +111,10 @@ public class SalesforceSnapInsPlugin extends CordovaPlugin {
                     public void handleResult(Async<?> async, @NonNull AvailabilityState state) {
                         switch (state.getStatus()) {
                             case AgentsAvailable:
-                                callbackContext.success("available");
+                                callbackContext.success("true");
                                 break;
                             case NoAgentsAvailable:
-                                callbackContext.success("not available");
+                                callbackContext.success("false");
                                 break;
                             case Unknown:
                                 callbackContext.error("Unknown error");

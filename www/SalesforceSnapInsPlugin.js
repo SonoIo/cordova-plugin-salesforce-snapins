@@ -207,7 +207,15 @@ SalesforceSnapInsPlugin.prototype.openLiveAgentChat = function openLiveAgentChat
 SalesforceSnapInsPlugin.prototype.determineAvailability = function determineAvailability(success, error) {
     if (!success) success = successCallback;
     if (!error) error = errorCallback;
-    exec(success, error, 'SalesforceSnapInsPlugin', 'determineAvailability', [ ]);
+    var internalSuccess = function (available) {
+        try {
+            available = JSON.parse(available);
+        } catch(e) {
+            available = false;
+        }
+        success(available);
+    };
+    exec(internalSuccess, error, 'SalesforceSnapInsPlugin', 'determineAvailability', [ ]);
     return this;
 };
 
