@@ -49,6 +49,7 @@ SalesforceSnapIns.addPrechatField({
 	type: 'hidden', // could be: text, hidden, picker
 	label: 'Subject',
 	value: 'Live Agent Chat support',
+	transcriptField: 'subject__c',
 	required: true
 });
 
@@ -208,6 +209,7 @@ cordova.plugins.SalesforceSnapIns.addPrechatField({
 	type: 'hidden', // could be: text, hidden, picker
 	label: 'Subject',
 	value: 'Live Agent Chat support',
+	transcriptField: 'subject__c',
 	required: true
 });
 
@@ -242,6 +244,7 @@ cordova.plugins.SalesforceSnapIns.addPrechatField({
 | field.**type** | Yes | Can be: `text`, `hidden`, `picker` |
 | field.**label** | Yes | Displayed field name to the user |
 | field.**value** | Yes (only for `hidden`) | Displayed field name to the user |
+| field.**transcriptField** | No | Transcript field |
 | field.**required** | No | Default **false** |
 | field.**keyboardType** | No (only for `text`) | Default **KEYBOARD_TYPE_DEFAULT**. <br />Possible values:<br />**KEYBOARD_TYPE_DEFAULT**<br />**KEYBOARD_TYPE_ASCII_CAPABLE**<br />**KEYBOARD_TYPE_NUMBERS_AND_PUNCTATION**<br />**KEYBOARD_TYPE_URL**<br />**KEYBOARD_TYPE_NUMBER_PAD**<br />**KEYBOARD_TYPE_PHONE_PAD**<br />**KEYBOARD_TYPE_NAME_PHONE_PAD**<br />**KEYBOARD_TYPE_EMAIL_ADDRESS**<br />**KEYBOARD_TYPE_DECIMAL_PAD**<br />**KEYBOARD_TYPE_TWITTER**<br />**KEYBOARD_TYPE_WEB_SEARCH**<br />**KEYBOARD_TYPE_ASCII_CAPABLE_NUMBER_PAD** |
 | field.**autocorrectionType** | No (only for `text`) | Default **AUTOCORRECTION_TYPE_DEFAULT**. Used on iOS only.<br />Possible values:<br />**AUTOCORRECTION_TYPE_DEFAULT**<br />**AUTOCORRECTION_TYPE_NO**<br />**AUTOCORRECTION_TYPE_YES** |

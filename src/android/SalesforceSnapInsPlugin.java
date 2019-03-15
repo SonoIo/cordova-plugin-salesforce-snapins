@@ -3,11 +3,8 @@ package org.apache.cordova.salesforce;
 import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.inputmethod.EditorInfo;
 
-import org.apache.cordova.CordovaActivity;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
@@ -90,13 +87,13 @@ public class SalesforceSnapInsPlugin extends CordovaPlugin {
             Activity mainActivity = this.cordova.getActivity();
 
             ChatUI.configure(ChatUIConfiguration.create(this.buildLiveAgentChatConfig()))
-                .createClient(getApplicationContext())
-                .onResult(new Async.ResultHandler<ChatUIClient>() {
-                    @Override public void handleResult (Async<?> operation, @NonNull ChatUIClient chatUIClient) {
-                        chatUIClient.startChatSession((FragmentActivity) mainActivity);
-                        callbackContext.success();
-                    }
-                });
+                    .createClient(getApplicationContext())
+                    .onResult(new Async.ResultHandler<ChatUIClient>() {
+                        @Override public void handleResult (Async<?> operation, @NonNull ChatUIClient chatUIClient) {
+                            chatUIClient.startChatSession(mainActivity);
+                            callbackContext.success();
+                        }
+                    });
 
         } else if (action.equals("determineAvailability")) {
 
@@ -106,22 +103,22 @@ public class SalesforceSnapInsPlugin extends CordovaPlugin {
 
             AgentAvailabilityClient client = ChatCore.configureAgentAvailability(this.buildLiveAgentChatConfig());
             client.check()
-                .onResult(new Async.ResultHandler<AvailabilityState>() {
-                    @Override
-                    public void handleResult(Async<?> async, @NonNull AvailabilityState state) {
-                        switch (state.getStatus()) {
-                            case AgentsAvailable:
-                                callbackContext.success("true");
-                                break;
-                            case NoAgentsAvailable:
-                                callbackContext.success("false");
-                                break;
-                            case Unknown:
-                                callbackContext.error("Unknown error");
-                                break;
+                    .onResult(new Async.ResultHandler<AvailabilityState>() {
+                        @Override
+                        public void handleResult(Async<?> async, @NonNull AvailabilityState state) {
+                            switch (state.getStatus()) {
+                                case AgentsAvailable:
+                                    callbackContext.success("true");
+                                    break;
+                                case NoAgentsAvailable:
+                                    callbackContext.success("false");
+                                    break;
+                                case Unknown:
+                                    callbackContext.error("Unknown error");
+                                    break;
+                            }
                         }
-                    }
-                });
+                    });
         } else if (action.equals("addPrechatField")) {
 
             JSONObject field;
@@ -175,6 +172,7 @@ public class SalesforceSnapInsPlugin extends CordovaPlugin {
         boolean isRequired;
         int keyboardType;
 //        int autocorrectionType; // not used on Android
+        String transcriptField;
         JSONArray values;
 
         try {
@@ -214,6 +212,12 @@ public class SalesforceSnapInsPlugin extends CordovaPlugin {
 //        }
 
         try {
+            transcriptField = (String) field.get("transcriptField");
+        } catch (JSONException e) {
+            transcriptField = "";
+        }
+
+        try {
             values = (JSONArray) field.get("values");
         } catch (JSONException e) {
             values = new JSONArray();
@@ -224,7 +228,7 @@ public class SalesforceSnapInsPlugin extends CordovaPlugin {
                 PreChatTextInputField newTextField = new PreChatTextInputField.Builder()
                         .required(isRequired)
                         .inputType(this.mapKeyboardType(keyboardType))
-                        // .mapToChatTranscriptFieldName("Email__c") // Method not supported on iOS
+                        .mapToChatTranscriptFieldName(transcriptField)
                         .build(label, label);
                 this.liveAgentChatUserData.add(newTextField);
                 break;
@@ -233,7 +237,8 @@ public class SalesforceSnapInsPlugin extends CordovaPlugin {
                 ChatUserData newHiddenField = new ChatUserData(
                         label,
                         value,
-                        true);
+                        true,
+                        transcriptField);
                 this.liveAgentChatUserData.add(newHiddenField);
                 break;
 
@@ -241,6 +246,7 @@ public class SalesforceSnapInsPlugin extends CordovaPlugin {
                 if (values.length() > 0) {
                     PreChatPickListField.Builder newPickerFieldBuilder = new PreChatPickListField.Builder();
                     newPickerFieldBuilder.required(isRequired);
+                    newPickerFieldBuilder.mapToChatTranscriptFieldName(transcriptField);
 
                     JSONObject aField;
                     String aLabel;
@@ -430,6 +436,7 @@ public class SalesforceSnapInsPlugin extends CordovaPlugin {
 
     private boolean clearPrechatEntities(CallbackContext callbackContext) {
         this.liveAgentChatEntities.clear();
+        callbackContext.success();
         return true;
     }
 

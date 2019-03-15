@@ -12,5 +12,5 @@ allprojects {
 }
 
 dependencies {
-  implementation 'com.salesforce.service:servicesdk:214.0.1'
+  implementation 'com.salesforce.service:servicesdk:218.0.0'
 }

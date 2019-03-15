@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<plugin id="cordova-plugin-salesforce-snapins" version="1.0.2"
+<plugin id="cordova-plugin-salesforce-snapins" version="1.0.3"
 xmlns="http://apache.org/cordova/ns/plugins/1.0"
 xmlns:android="http://schemas.android.com/apk/res/android">
 	<name>Snap-ins Salseforce</name>
@@ -46,13 +46,13 @@ xmlns:android="http://schemas.android.com/apk/res/android">
 
 	<platform name="ios">
 		<dependency id="cordova-plugin-add-swift-support" version="~1.7.0" />
-		<dependency id="cordova-plugin-cocoapod-support" version="~1.3.0" />
+		<dependency id="cordova-plugin-cocoapod-support" version="~1.6.0" />
 
 		<pods-config ios-min-version="9.0" use-frameworks="true">
 			<source url="https://github.com/CocoaPods/Specs.git" />
 			<source url="https://github.com/goinstant/pods-specs-public" />
 		</pods-config>
-		<pod name="ServiceSDK" spec="214.0.3" />
+		<pod name="ServiceSDK" spec="218.0.1" />
 
 		<config-file parent="/*" target="config.xml">
 			<feature name="SalesforceSnapInsPlugin">
@@ -62,7 +62,7 @@ xmlns:android="http://schemas.android.com/apk/res/android">
 
 		<header-file src="src/ios/SalesforceSnapIns-Plugin-Bridging-Header.h" />
 		<source-file src="src/ios/SalesforceSnapInsPlugin.swift" />
-	</platform>
 
-	<!-- <hook src="scripts/after_prepare.js" type="after_prepare" /> -->
+		<preference name="UseSwiftLanguageVersion" value="4" />
+	</platform>
 </plugin>

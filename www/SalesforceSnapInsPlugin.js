@@ -88,6 +88,7 @@ SalesforceSnapInsPlugin.prototype.initialize = function initialize(options, succ
  *   type: 'text',
  *   label: 'Email',
  *   required: true,
+ *   transcriptField: 'email__c',
  *   keyboardType: SalesforceSnapIns.KEYBOARD_TYPE_EMAIL_ADDRESS,
  *   autocorrectionType: SalesforceSnapIns.AUTOCORRECTION_TYPE_NO
  * });

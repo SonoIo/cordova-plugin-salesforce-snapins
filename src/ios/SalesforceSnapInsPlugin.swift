@@ -33,7 +33,7 @@ func hexStringToUIColor(_ hex: String) -> UIColor {
 }
 
 
-@objc(SalesforceSnapInsPlugin) class SalesforceSnapInsPlugin: CDVPlugin, UNUserNotificationCenterDelegate {
+@objc(SalesforceSnapInsPlugin) class SalesforceSnapInsPlugin: CDVPlugin, UNUserNotificationCenterDelegate, SCSChatSessionDelegate {
 
     static let sharedInstance = SalesforceSnapInsPlugin()
     static func shared() -> SalesforceSnapInsPlugin { return SalesforceSnapInsPlugin.sharedInstance }
@@ -48,6 +48,8 @@ func hexStringToUIColor(_ hex: String) -> UIColor {
     // TODO: here add SOS and Case management configuration
 
     override func pluginInitialize () {
+        ServiceCloud.shared().chatCore.add(delegate: self)
+
         if #available(iOS 10.0, *) {
             let center = UNUserNotificationCenter.current()
             center.delegate = SalesforceSnapInsPlugin.shared()
@@ -108,12 +110,14 @@ func hexStringToUIColor(_ hex: String) -> UIColor {
         self.deploymentId = deploymentId
         self.buttonId = buttonId
 
+
+
         self.liveAgentChatConfig = SCSChatConfiguration(liveAgentPod: liveAgentPod,
                                                         orgId: orgId,
                                                         deploymentId: deploymentId,
                                                         buttonId: buttonId)
 
-        return nil;
+        return nil
     }
 
     func setAppearanceColor(_ appearance: SCAppearanceConfiguration, color: UIColor, forName: String) {
@@ -168,7 +172,7 @@ func hexStringToUIColor(_ hex: String) -> UIColor {
 
         ServiceCloud.shared().appearanceConfiguration = appearance
 
-        return nil;
+        return nil
     }
 
     @objc func addPrechatField(_ command: CDVInvokedUrlCommand) {
@@ -184,6 +188,7 @@ func hexStringToUIColor(_ hex: String) -> UIColor {
         let type = field["type"] as? String ?? "text"
         let label = field["label"] as? String ?? "Label"
         let value = field["value"] as? String ?? "empty"
+        let transcriptField = field["transcriptField"] as? String ?? nil
         let isRequired = field["required"] as? Bool ?? false
         let keyboardType = field["keyboardType"] as? Int ?? 0
         let autocorrectionType = field["autocorrectionType"] as? Int ?? 0
@@ -195,10 +200,16 @@ func hexStringToUIColor(_ hex: String) -> UIColor {
             newTextField.isRequired = isRequired
             newTextField.keyboardType = UIKeyboardType(rawValue: keyboardType)!
             newTextField.autocorrectionType = UITextAutocorrectionType(rawValue: autocorrectionType)!
-            config.prechatFields.add(newTextField)
+            if transcriptField != nil {
+                newTextField.transcriptFields.add(transcriptField!)
+            }
+            config.prechatFields.append(newTextField)
         case "hidden":
             let newHiddenField = SCSPrechatObject(label: label, value: value)
-            config.prechatFields.add(newHiddenField)
+            if transcriptField != nil {
+                newHiddenField.transcriptFields.add(transcriptField!)
+            }
+            config.prechatFields.append(newHiddenField)
         case "picker":
             if values != nil {
                 let pickerOptions = NSMutableArray()
@@ -207,9 +218,12 @@ func hexStringToUIColor(_ hex: String) -> UIColor {
                     let aPickerOptionValue = aValue["value"] as? String ?? ""
                     pickerOptions.add(SCSPrechatPickerOption(label: aPickerOptionLabel, value: aPickerOptionValue))
                 }
-                let pickerField = SCSPrechatPickerObject(label: label, options: pickerOptions as NSArray as! [SCSPrechatPickerOption])
+                let pickerField = SCSPrechatPickerObject(label: label, options: pickerOptions as NSArray as? [SCSPrechatPickerOption])
                 pickerField!.isRequired = isRequired
-                config.prechatFields.add(pickerField!)
+                if transcriptField != nil {
+                    pickerField?.transcriptFields.add(transcriptField!)
+                }
+                config.prechatFields.append(pickerField!)
             }
         default:
             return self.commandDelegate!.send(CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: "Unknown field type \(type)"), callbackId: command.callbackId)
@@ -223,7 +237,7 @@ func hexStringToUIColor(_ hex: String) -> UIColor {
             return self.commandDelegate!.send(CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: "Initialize plugin with liveAgentChat option before clear pre-chat fields"), callbackId: command.callbackId)
         }
         // Remove old pre-chat fields
-        config.prechatFields.removeAllObjects()
+        config.prechatFields.removeAll()
         self.commandDelegate!.send(CDVPluginResult(status: CDVCommandStatus_OK), callbackId: command.callbackId)
     }
 
@@ -265,7 +279,7 @@ func hexStringToUIColor(_ hex: String) -> UIColor {
             }
         }
 
-        config.prechatEntities.add(newEntity)
+        config.prechatEntities.append(newEntity)
 
         self.commandDelegate!.send(CDVPluginResult(status: CDVCommandStatus_OK), callbackId: command.callbackId)
     }
@@ -275,20 +289,19 @@ func hexStringToUIColor(_ hex: String) -> UIColor {
             return self.commandDelegate!.send(CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: "Initialize plugin with liveAgentChat option before clear pre-chat entities"), callbackId: command.callbackId)
         }
         // Remove old pre-chat fields
-        config.prechatEntities.removeAllObjects()
+        config.prechatEntities.removeAll()
         self.commandDelegate!.send(CDVPluginResult(status: CDVCommandStatus_OK), callbackId: command.callbackId)
     }
 
     @objc func openLiveAgentChat(_ command: CDVInvokedUrlCommand) {
-        let chat = ServiceCloud.shared().chat!
         let config = self.liveAgentChatConfig!
-        chat.startSession(with: config)
+        ServiceCloud.shared().chatUI.showChat(with: config, showPrechat: !config.prechatFields.isEmpty)
         let result: CDVPluginResult = CDVPluginResult(status: CDVCommandStatus_OK)
         commandDelegate!.send(result, callbackId: command.callbackId)
     }
 
     @objc func determineAvailability(_ command: CDVInvokedUrlCommand) {
-        let chat = ServiceCloud.shared().chat!
+        let chat = ServiceCloud.shared().chatCore!
         let config = self.liveAgentChatConfig!
         let commandDelegate = self.commandDelegate!
         chat.determineAvailability(with: config, completion: { (error: Error?, available: Bool) in
@@ -302,6 +315,10 @@ func hexStringToUIColor(_ hex: String) -> UIColor {
             }
             commandDelegate.send(result, callbackId: command.callbackId)
         })
+    }
+
+    @objc func session(_ session: SCSChatSession!, didError error: Error!, fatal: Bool) {
+        print("Chat error: \(error.localizedDescription)")
     }
 
     // MARK: - UNUserNotificationCenterDelegate
