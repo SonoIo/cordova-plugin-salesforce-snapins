@@ -286,6 +286,7 @@ public class SalesforceSnapInsPlugin extends CordovaPlugin {
 
     private boolean clearPrechatFields(CallbackContext callbackContext) {
         this.liveAgentChatUserData.clear();
+        callbackContext.success();
         return true;
     }
 
